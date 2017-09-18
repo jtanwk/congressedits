@@ -123,7 +123,7 @@ Tackling the obvious questions first.
 
     ## Selecting by n
 
-![](congressedits_markdown_files/figure-markdown_github-ascii_identifiers/frequency-1.png)
+![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_bypage.png?raw=true)
 
 No surprises here - all political figures or topics. Most likely PR teams doing their jobs. What about disaggregating this by edits from the House versus the Senate?
 
@@ -145,7 +145,7 @@ No surprises here - all political figures or topics. Most likely PR teams doing 
 
     ## Selecting by n
 
-![](congressedits_markdown_files/figure-markdown_github-ascii_identifiers/housevssenate-1.png)
+![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_bysource.png?raw=true)
 
 At this point, if there *weren't* people on Capitol Hill taking an intense interest in Chaldean Neo-Aramaic, I'd be concerned. Moving on.
 
@@ -174,7 +174,7 @@ Plotting first by calendar date:
 
     ## pad applied on the interval: day
 
-![](congressedits_markdown_files/figure-markdown_github-ascii_identifiers/tweetsbydate-1.png)
+![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_bydate.png?raw=true)
 
 No big cyclical trends that I can see. What's that big spike in 2015?
 
@@ -266,7 +266,7 @@ clean_congress_tweets %>%
 
     ## pad applied on the interval: hour
 
-![](congressedits_markdown_files/figure-markdown_github-ascii_identifiers/punchcard-1.png)
+![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_daytimes.png?raw=true)
 
 Some observations here:
 
@@ -305,7 +305,7 @@ In fact - let's delve deeper into these late night edits. Which pages are actual
          subtitle = "Using only pages with edits between 12 midnight and 8 am, represented by the shaded area.")
 ```
 
-![](congressedits_markdown_files/figure-markdown_github-ascii_identifiers/latenight-1.png)
+![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweets_midnightedits.png?raw=true)
 
 Someone at the Nebraska Republican Party is working *hard*.
 
@@ -373,7 +373,8 @@ What a lot of work. So what **are** the most frequent categories of Wikipedia pa
 
     ## Selecting by n
 
-![](congressedits_markdown_files/figure-markdown_github-ascii_identifiers/mostfreqcategories-1.png)
+![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_categories.png?raw=true)
+
 
 In terms of edit activity, Republican representatives' pages are edited more often than those for Democrat representatives - at least within the date range of our tweets.
 
@@ -382,6 +383,8 @@ Outside of that, no particularly surprising results. If anything, we've learned 
 #### 4. Which tweets got the most engagement?
 
 Let's be real: some of these page edits are pretty weird. When a tweet pops up alerting you that [the Wikipedia page for Carly Rae Jepsen was edited from a Congress location](https://twitter.com/congressedits/status/908078698083086342), that's the kind of thing that Twitter takes notice of. Especially if the specific edit is to describe her as the "worlds \[*sic*\] greatest singer".
+
+<img src="https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/jepsen.PNG?raw=true" width="600">
 
 This is my shorthand for finding the rare non-political edit amongst this dataset. If anyone can tell me a better way to find out what shouldn't be edited from Congress but has been, I'm all ears.
 
@@ -401,7 +404,7 @@ clean_congress_tweets %>%
          subtitle = "Using 1,430 tweets scraped from @congressedits between Aug 17, 2014 and Sep 15, 2017.")
 ```
 
-![](congressedits_markdown_files/figure-markdown_github-ascii_identifiers/twitterengagement-1.png)
+![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweets_engagement.png?raw=true)
 
 A little back story: the @congressedits Twitter account actually gained minor fame back in 2014 in reporting the anonymous edits to the page on "Senate Intelligence Committee report on CIA torture". The [actual edit](https://en.wikipedia.org/w/index.php?diff=637495578&oldid=637494879), which removed a phrase describing "enhanced interrogation techniques" as "a euphemism for torture", was tweeted out and news media [quickly picked up on it](http://mashable.com/2014/12/10/senate-wikipedia-torture-report/#eppO_ueOCkqM). I'm a little surprised it's this low on the list.
 
