@@ -384,7 +384,7 @@ Outside of that, no particularly surprising results. If anything, we've learned 
 
 Let's be real: some of these page edits are pretty weird. When a tweet pops up alerting you that [the Wikipedia page for Carly Rae Jepsen was edited from a Congress location](https://twitter.com/congressedits/status/908078698083086342), that's the kind of thing that Twitter takes notice of. Especially if the specific edit is to describe her as the "worlds \[*sic*\] greatest singer".
 
-<img src="https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/jepsen.PNG?raw=true" width="600">
+<img src="https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/jepsen.PNG?raw=true" width="900">
 
 This is my shorthand for finding the rare non-political edit amongst this dataset. If anyone can tell me a better way to find out what shouldn't be edited from Congress but has been, I'm all ears.
 
