@@ -75,7 +75,7 @@ After the authentication, it's a simple matter of scraping all available tweets 
 
 I didn't know it when I started this project, but I was going to need a crash course in regex formatting. Fortunately, I found a short and simple tutorial [here](https://regexone.com/).
 
-Cleaning steps below, in order:
+A short list of my cleaning steps, in pipe order:
 
 1.  Remove all tweets that were not edit reports
 2.  Extract Wikipedia page title to "subject"
@@ -86,19 +86,6 @@ Cleaning steps below, in order:
 7.  Convert all page titles with foreign characters to ASCII
 8.  Remove all tweets with no subject
 
-``` r
-  clean_congress_tweets <- congress_tweets_df %>%
-    filter(str_detect(text, "Wikipedia article edited anonymously")) %>%
-    select(text, favoriteCount, created, id, retweetCount) %>%
-    mutate(subject = str_replace_all(text, " Wikipedia article edited anonymously from US (House of Representatives|Senate) (http|https)://t.co/[A-Za-z\\d]+|&amp;", "")) %>%
-    mutate(url = str_extract(text, "(http|https)://t.co/[A-Za-z\\d]+|&amp;")) %>%
-    mutate(source = str_extract(text, "US (House of Representatives|Senate)")) %>%
-    filter(str_detect(subject, "(http|https)://[A-Za-z\\d]+") == FALSE) %>%
-    filter(str_detect(subject, "(File|Commons|User talk):") == FALSE) %>%
-    mutate(subject = iconv(subject, to = "ASCII")) %>%
-    filter(subject != "NA")
-```
-
 Analysis
 --------
 
@@ -106,44 +93,9 @@ Analysis
 
 Tackling the obvious questions first.
 
-``` r
-  clean_congress_tweets %>%
-    count(subject, sort = TRUE) %>%
-    top_n(10) %>%
-    mutate(subject = str_wrap(subject, width = 20)) %>%
-    ggplot(aes(x = reorder(subject, n), y = n)) +
-    geom_col() +
-    coord_flip() +
-    theme_minimal() +
-    labs(x = NULL,
-         y = "Number of Edits",
-         title = "The 10 Most Frequently Edited Wikipedia Pages at Congress",
-         subtitle = "Using 1,430 tweets scraped from @congressedits between Aug 17, 2014 and Sep 15, 2017.")
-```
-
-    ## Selecting by n
-
 ![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_bypage.png?raw=true)
 
 No surprises here - all political figures or topics. Most likely PR teams doing their jobs. What about disaggregating this by edits from the House versus the Senate?
-
-``` r
-  clean_congress_tweets %>%
-    count(source, subject, sort = TRUE) %>%
-    top_n(10) %>%
-    mutate(subject = str_wrap(subject, width = 20)) %>%
-    ggplot(aes(x = reorder(subject, n), y = n, fill = source)) +
-    geom_col(show.legend = FALSE) +
-    coord_flip() +
-    facet_wrap(~source, nrow = 1, scales = "free") +
-    theme_minimal() +
-    labs(x = NULL,
-         y = "Number of Edits",
-         title = "The 10 Most Frequent Wikipedia Page Edits from House vs. Senate",
-         subtitle = "Using 1,430 tweets scraped from @congressedits between Aug 17, 2014 and Sep 15, 2017.")
-```
-
-    ## Selecting by n
 
 ![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_bysource.png?raw=true)
 
@@ -157,54 +109,9 @@ I'm assuming at this point that there's a fairly low discrepancy between the tim
 
 Plotting first by calendar date:
 
-``` r
-  clean_congress_tweets %>%
-    mutate(created = as.Date(created)) %>%
-    count(created) %>%
-    pad() %>%
-    mutate(n = ifelse(is.na(n), 0, n)) %>%
-    ggplot(aes(x = created, y = n)) +
-    geom_line(color = "grey50") +
-    theme_minimal() +
-    labs(x = "Date",
-         y = "Number of Edits",
-         title = "Number of Wikipedia Edits from Congress by Date",
-         subtitle = "Using 1,430 tweets scraped from @congressedits between Aug 17, 2014 and Sep 15, 2017.")
-```
-
-    ## pad applied on the interval: day
-
 ![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_bydate.png?raw=true)
 
 No big cyclical trends that I can see. What's that big spike in 2015?
-
-``` r
-  clean_congress_tweets %>%
-    mutate(created = as.Date(created)) %>%
-    count(created, sort = TRUE) %>%
-    top_n(5)
-```
-
-    ## Selecting by n
-
-    ## # A tibble: 5 × 2
-    ##      created     n
-    ##       <date> <int>
-    ## 1 2015-06-22    30
-    ## 2 2015-01-22    23
-    ## 3 2014-07-23    19
-    ## 4 2014-08-05    18
-    ## 5 2014-09-22    16
-
-``` r
-  ## Spike occured on June 22, 2015.  
-  ## What pages were edited?
-  clean_congress_tweets %>%
-    mutate(created = as.Date(created)) %>%
-    filter(created == "2015-06-22") %>%
-    count(subject, sort = TRUE) %>%
-    print(n = 29)
-```
 
     ## # A tibble: 29 × 2
     ##                                              subject     n
@@ -243,29 +150,6 @@ Someone had a very, very slow Monday on June 22, 2015.
 
 Let's try a different tactic. What patterns arise if we look at the number of edits by time and day of the week?
 
-``` r
-clean_congress_tweets %>%
-    mutate(created = as.POSIXct(created)) %>%
-    mutate(day = factor(weekdays(created),levels = c("Sunday", "Saturday", "Friday", "Thursday", "Wednesday", "Tuesday", "Monday"))) %>%
-    mutate(created = format(created, "%Y-%m-%d %H:00:00")) %>%
-    count(day, created) %>%
-    mutate(created = as.POSIXct(created)) %>%
-    pad() %>%    ## padr::pad inserts NA rows for missing date/times
-    mutate(created = format(created, "%H")) %>% 
-    mutate(n = ifelse(is.na(n), 0, n)) %>%
-    group_by(day, created) %>%
-    summarise(edits = ifelse(sum(n) == 0, NA, sum(n))) %>%
-    ggplot(aes(x = created, y = day, size = edits)) +
-    geom_point() +
-    theme_minimal() +
-    labs(x = "Hour in Day",
-         y = "Number of Edits",
-         title = "Number of Wikipedia Edits from Congress by Day/Time",
-         subtitle = "Using 1,430 tweets scraped from @congressedits between Aug 17, 2014 and Sep 15, 2017.")
-```
-
-    ## pad applied on the interval: hour
-
 ![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_daytimes.png?raw=true)
 
 Some observations here:
@@ -274,36 +158,6 @@ Some observations here:
 -   There is non-trivial Wikipedia activity happening at Congress in the early morning hours, particularly on Tuesdays and Thursdays. To be fair, these might just be one or two overnight politics-fueled editing sprees.
 
 In fact - let's delve deeper into these late night edits. Which pages are actually being edited at completely unreasonable hours - say, between 12 midnight and 8:00 am?
-
-``` r
-  ## which pages had late night tweets?
-  latenight <- clean_congress_tweets %>%
-    select(subject, created, source) %>%
-    mutate(created = as.POSIXct(created)) %>%
-    mutate(hour = as.numeric(format(created, "%H"))) %>%
-    filter(hour <= 8) %>%
-    count(subject, sort = TRUE) 
-  
-  ## plotting frequency of late night tweets by page
-  clean_congress_tweets %>%
-    filter(subject %in% latenight$subject) %>%
-    mutate(created = as.POSIXct(created)) %>%
-    mutate(hour = as.numeric(format(created, "%H"))) %>%
-    count(subject, hour) %>%
-    ggplot(aes(x = hour, y = n)) +
-    geom_col() +
-    annotate(geom = "rect",
-             xmin = 0, xmax = 8, ymin = -Inf, ymax = Inf,
-             fill = "blue",
-             alpha = 0.2) +
-    xlim(-0.5, 23.5) +
-    facet_wrap(~subject) +
-    theme_minimal() +
-    labs(x = "Hour in Day",
-         y = "Number of Edits",
-         title = "Late Night Wikipedia Page Edits from Congress",
-         subtitle = "Using only pages with edits between 12 midnight and 8 am, represented by the shaded area.")
-```
 
 ![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweets_midnightedits.png?raw=true)
 
@@ -333,48 +187,9 @@ getCategories("Bill Hader")
 
     ## [1] "Category:1978 births;Category:21st-century American male actors;Category:American impressionists (entertainers);Category:American male comedians;Category:American male film actors;Category:American male television actors;Category:American male voice actors;Category:American people of Danish descent;Category:American people of English descent;Category:American people of German descent;Category:American people of Irish descent;Category:American sketch comedians;Category:American stand-up comedians;Category:American television writers;Category:Comedians from Oklahoma;Category:Living people;Category:Male actors from Tulsa, Oklahoma;Category:Male television writers;Category:Peabody Award winners;Category:Primetime Emmy Award winners;Category:Scottsdale Community College alumni;Category:Writers from Tulsa, Oklahoma"
 
-Beautiful. Now to recursively call `getCategories` for all the pages in our dataset, and wrangle it into a tidy tweet-category format.
-
-``` r
-  ## add empty "categories" column to tibble
-  congress_categories <- clean_congress_tweets %>%
-    mutate(categories = "")
-  
-  ## original function hit API limits, so we use a for loop to call the function separately for each row
-  for (i in 1:length(congress_categories$subject)) {
-    congress_categories$categories[i] <- getCategories(congress_categories$subject[i])
-    print(paste(i, " of ", length(congress_categories$subject), sep = ""))
-  }
-  
-  ## finally, convert long string of multiple categories into tidy tweet-category-level data
-  congress_categories <- congress_categories %>%
-    mutate(categories = strsplit(categories, ";")) %>%
-    unnest(categories) %>%
-    mutate(categories = str_replace_all(categories, "Category:", ""))
-```
-
-What a lot of work. So what **are** the most frequent categories of Wikipedia pages that get edited from Congress IP addresses?
-
-``` r
-  congress_categories %>%
-    filter(is.na(categories) == FALSE) %>%
-    count(categories, sort = TRUE) %>%
-    top_n(10) %>%
-    mutate(categories = str_wrap(categories, width = 30)) %>%     ## wraps labels for long category names
-    ggplot(aes(x = reorder(categories, n), y = n)) +
-    geom_col() +
-    coord_flip() +
-    theme_minimal() +
-    labs(x = NULL,
-         y = "Number of Edits",
-         title = "Categories of Most Frequent Wikipedia Page Edits from Congress",
-         subtitle = "Using 1,430 tweets scraped from @congressedits between Aug 17, 2014 and Sep 15, 2017.")
-```
-
-    ## Selecting by n
+Beautiful. Now that we've wrangled into tidy category-level data - what **are** the most frequent categories of Wikipedia pages that get edited from Congress IP addresses?
 
 ![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweet_categories.png?raw=true)
-
 
 In terms of edit activity, Republican representatives' pages are edited more often than those for Democrat representatives - at least within the date range of our tweets.
 
@@ -384,25 +199,11 @@ Outside of that, no particularly surprising results. If anything, we've learned 
 
 Let's be real: some of these page edits are pretty weird. When a tweet pops up alerting you that [the Wikipedia page for Carly Rae Jepsen was edited from a Congress location](https://twitter.com/congressedits/status/908078698083086342), that's the kind of thing that Twitter takes notice of. Especially if the specific edit is to describe her as the "worlds \[*sic*\] greatest singer".
 
-<img src="https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/jepsen.PNG?raw=true" width="900">
+<img src="https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/jepsen.PNG?raw=true" width="800">
 
 This is my shorthand for finding the rare non-political edit amongst this dataset. If anyone can tell me a better way to find out what shouldn't be edited from Congress but has been, I'm all ears.
 
 Back to the weird stuff. Looking at some of the more popular tweets in terms of Twitter engagement (in terms of favorites and retweets), what actually got traction?
-
-``` r
-clean_congress_tweets %>%
-    select(subject, favoriteCount, retweetCount, source) %>%
-    mutate(labels = ifelse(favoriteCount > 1000 | retweetCount > 500, subject, "")) %>%
-    ggplot(aes(x = retweetCount, y = favoriteCount)) +
-    geom_point() +
-    geom_text_repel(aes(label = labels)) +
-    theme_minimal() +
-    labs(x = "Retweets",
-         y = "Favorites",
-         title = "@CongressEdits Tweets by Twitter Engagement",
-         subtitle = "Using 1,430 tweets scraped from @congressedits between Aug 17, 2014 and Sep 15, 2017.")
-```
 
 ![](https://raw.githubusercontent.com/jtanwk/congressedits/master/Images/tweets_engagement.png?raw=true)
 
