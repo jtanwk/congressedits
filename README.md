@@ -1,4 +1,4 @@
-Wikipedia Edits from Congress
+Wikipedia Edits from Congress: 1,430 Tweets by @congressedits
 ================
 September 16, 2017
 
