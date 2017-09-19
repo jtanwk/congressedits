@@ -4,9 +4,9 @@ September 16, 2017
 
 I first stumbled across the [@congressedits twitter account](https://twitter.com/congressedits) last year. If you haven't heard of it, it's a Twitter bot that detects edits made on Wikipedia pages that originate from certain IP addresses associated with Congress, and tweets out the changelog. Naturally, I saw an unmined dataset and pounced.
 
-*Note: The underlying code is all open source and adaptable to different IP ranges. Definitely check the [Github repo](https://github.com/edsu/anon) out if you're interested in looking deeper. It's a great project.*
+The underlying code is all open source and adaptable to different IP ranges. Definitely check the [Github repo](https://github.com/edsu/anon) out if you're interested in looking deeper. It's a great project.
 
-#### A Note on IP Addresses
+### A Quick Note on IP Addresses
 
 It's also worth prefacing this entire article by saying that an IP address does not mean rock-solid attribution. Per the [CongressEdits Wikipedia page](https://en.wikipedia.org/wiki/CongressEdits):
 
@@ -39,7 +39,7 @@ options(stringsAsFactors = FALSE)
 Getting the Tweets
 ------------------
 
-#### Authentication
+### Authentication
 
 I followed [these instructions](https://stackoverflow.com/questions/1808855/getting-new-twitter-api-consumer-and-secret-keys) to obtain the authentication keys that the TwittR package needs.
 
@@ -56,7 +56,7 @@ setup_twitter_oauth(consumer_key,
                     access_token_secret)
 ```
 
-#### Scraping
+### Scraping
 
 After the authentication, it's a simple matter of scraping all available tweets from @congressedits using the `twittR::usertimeline` command.
 
@@ -71,11 +71,11 @@ After the authentication, it's a simple matter of scraping all available tweets 
     tbl_df()
 ```
 
-#### Cleaning
+### Cleaning
 
 I didn't know it when I started this project, but I was going to need a crash course in regex formatting. Fortunately, I found a short and simple tutorial [here](https://regexone.com/).
 
-A short list of my cleaning steps, in pipe order:
+If you're looking at the code, here's short list of my cleaning steps in pipe order:
 
 1.  Remove all tweets that were not edit reports
 2.  Extract Wikipedia page title to "subject"
@@ -89,7 +89,7 @@ A short list of my cleaning steps, in pipe order:
 Analysis
 --------
 
-#### 1. What Wikipedia pages are edited the most?
+### 1. What Wikipedia pages are edited the most?
 
 Tackling the obvious questions first.
 
@@ -101,7 +101,7 @@ No surprises here - all political figures or topics. Most likely PR teams doing 
 
 At this point, if there *weren't* people on Capitol Hill taking an intense interest in Chaldean Neo-Aramaic, I'd be concerned. Moving on.
 
-#### 2. When are Wikipedia pages being edited?
+### 2. When are Wikipedia pages being edited?
 
 Another simple question. Are there trends that we might be able to find in the dates or times of the tweets?
 
@@ -163,7 +163,7 @@ In fact - let's delve deeper into these late night edits. Which pages are actual
 
 Someone at the Nebraska Republican Party is working *hard*.
 
-#### 3. What *types* of Wikipedia pages are being edited?
+### 3. What *types* of Wikipedia pages are being edited?
 
 So far, we've dealt mainly with page titles. However, each Wikipedia page also belong to several categories, which we can scrape for each page using the `wikipediR` package. The raw output is a little hairy, so I wrote a function to make it a little easier on the eyes.
 
@@ -195,7 +195,7 @@ In terms of edit activity, Republican representatives' pages are edited more oft
 
 Outside of that, no particularly surprising results. If anything, we've learned that most of these edits are happening within the political bubble. The interesting stuff, if it's there, might lie outside of it.
 
-#### 4. Which tweets got the most engagement?
+### 4. Which tweets got the most engagement?
 
 Let's be real: some of these page edits are pretty weird. When a tweet pops up alerting you that [the Wikipedia page for Carly Rae Jepsen was edited from a Congress location](https://twitter.com/congressedits/status/908078698083086342), that's the kind of thing that Twitter takes notice of. Especially if the specific edit is to describe her as the "worlds \[*sic*\] greatest singer".
 
